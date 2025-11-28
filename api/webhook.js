@@ -55,7 +55,17 @@ function handleEvent(event) {
         // 預設回覆，引導使用者
         replyText = `請輸入指令：\n  1. 新增事項：+ 事項內容\n  2. 查看清單：list`;
     }
+} else if (userText.toLowerCase().startsWith('del')) {
+        // 刪除待辦事項: del 1
+        const indexStr = userText.substring(3).trim();
+        const index = parseInt(indexStr) - 1; // 使用者輸入從 1 開始，陣列從 0 開始
 
+        if (isNaN(indexStr) || index < 0 || index >= todoList[userId].length) {
+            replyText = '請輸入正確的項目編號，例如：del 1';
+        } else {
+            const deletedItem = todoList[userId].splice(index, 1);
+            replyText = `🗑️ 已刪除待辦事項: "${deletedItem[0]}"`;
+        }
     // ====== 待辦事項邏輯判斷 結束 ======
 
 
