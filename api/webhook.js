@@ -50,28 +50,45 @@ function getConversationId(event) {
  * @param {object} event - Line 訊息事件物件
  * @returns {Promise<object>} 包含 displayName 的 Promise
  */
+// 請用這段程式碼完整替換您檔案中的 async function getSenderProfile(event) 函式
+
+/**
+ * 取得發送者在當前對話中的名稱 (用於顯示誰在執行/完成任務)
+ * @param {object} event - Line 訊息事件物件
+ * @returns {Promise<object>} 包含 displayName 的 Promise
+ */
 async function getSenderProfile(event) {
     const userId = event.source.userId;
     const source = event.source;
 
     try {
         if (source.type === 'user') {
-            // 個人聊天
+            // 個人聊天: 最穩定
             const profile = await client.getProfile(userId);
             return { displayName: profile.displayName };
         } else if (source.type === 'group') {
-            // 群組聊天
-            const profile = await client.getGroupMemberProfile(source.groupId, userId);
-            return { displayName: profile.displayName };
+            // 群組聊天: 可能失敗，使用 try-catch
+            try {
+                const profile = await client.getGroupMemberProfile(source.groupId, userId);
+                return { displayName: profile.displayName };
+            } catch (e) {
+                console.error("無法取得群組成員名稱，可能是非好友或權限不足:", e);
+            }
         } else if (source.type === 'room') {
-            // 聊天室
-            const profile = await client.getRoomMemberProfile(source.roomId, userId);
-            return { displayName: profile.displayName };
+            // 聊天室: 可能失敗，使用 try-catch
+            try {
+                const profile = await client.getRoomMemberProfile(source.roomId, userId);
+                return { displayName: profile.displayName };
+            } catch (e) {
+                console.error("無法取得聊天室成員名稱，可能是非好友或權限不足:", e);
+            }
         }
     } catch (e) {
-        console.error("無法取得發送者名稱:", e);
+        // 頂層錯誤捕捉，例如 client.getProfile 網路錯誤
+        console.error("頂層 Profile 錯誤:", e);
     }
-    return { displayName: '未知成員' };
+    // 如果 Line API 失敗，則回傳 '未知成員'，讓 Bot 程式繼續運行
+    return { displayName: '未知成員' }; 
 }
 // 6. 核心事件處理函式 (MongoDB 邏輯)
 // 請用這段程式碼完整替換您檔案中的 async function handleEvent(event) 函式
