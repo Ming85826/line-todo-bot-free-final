@@ -28,7 +28,7 @@ function handleEvent(event) {
 }
 
 // Webhook 接收路由 (Vercel 將此檔案視為一個函式)
-app.post('/', middleware(lineConfig), (req, res) => {
+app.post('/api/webhook', middleware(lineConfig), (req, res) => {
     Promise
         .all(req.body.events.map(handleEvent))
         .then((result) => res.json(result))
