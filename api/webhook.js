@@ -17,7 +17,7 @@ const lineClient = new Client(lineConfig);
 const app = express();
 
 
-// (2) 處理 Line 發送的單一事件 (已修改為處理 Todo 邏輯)
+// (2) 處理 Line 發送的單一事件
 function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
         return Promise.resolve(null);
@@ -51,11 +51,7 @@ function handleEvent(event) {
             const listItems = todoList[userId].map((item, index) => `${index + 1}. ${item}`).join('\n');
             replyText = `📝 您的待辦清單：\n${listItems}`;
         }
-    } else {
-        // 預設回覆，引導使用者
-        replyText = `請輸入指令：\n  1. 新增事項：+ 事項內容\n  2. 查看清單：list`;
-    }
-} else if (userText.toLowerCase().startsWith('del')) {
+    } else if (userText.toLowerCase().startsWith('del')) { // <-- 正確地連著上一個 else if
         // 刪除待辦事項: del 1
         const indexStr = userText.substring(3).trim();
         const index = parseInt(indexStr) - 1; // 使用者輸入從 1 開始，陣列從 0 開始
@@ -66,6 +62,11 @@ function handleEvent(event) {
             const deletedItem = todoList[userId].splice(index, 1);
             replyText = `🗑️ 已刪除待辦事項: "${deletedItem[0]}"`;
         }
+    } else { // <-- 所有的邏輯都判斷完畢，最後才是預設回覆
+        // 預設回覆，引導使用者
+        replyText = `請輸入指令：\n  1. 新增事項：+ 事項內容\n  2. 查看清單：list\n  3. 刪除事項：del 編號`;
+    }
+    
     // ====== 待辦事項邏輯判斷 結束 ======
 
 
