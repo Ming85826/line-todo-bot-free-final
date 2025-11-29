@@ -3,10 +3,7 @@
 // Vercel Serverless Function
 // ===============================================
 
-// 1. 引入必要的套件與設定
-require('dotenv').config({ path: './env.local' });
-const { Client } = require('@line/bot-sdk');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+
 
 // 2. Line Bot 設定
 const lineConfig = {
