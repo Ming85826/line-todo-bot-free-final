@@ -304,8 +304,8 @@ async function handleEvent(event) {
     return null;
 }
 
-// 7. Vercel 輸出 Handler (取代 module.exports = app;)
-module.exports.handler = async (req, res) => {
+// 7. Vercel 輸出 Handler (使用單一導出函式，解決 Invalid export 錯誤)
+module.exports = async (req, res) => { // ⚠️ 這裡修改為 module.exports = async (req, res) =>
     if (req.method !== 'POST') {
         return res.status(405).send('Method Not Allowed');
     }
@@ -314,6 +314,7 @@ module.exports.handler = async (req, res) => {
     const body = req.body;
     
     try {
+        // Line Bot SDK 的驗證碼邏輯
         if (!client.validateSignature(JSON.stringify(body), signature)) {
             console.log('Invalid signature');
             return res.status(400).send('Invalid signature');
