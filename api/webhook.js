@@ -87,6 +87,15 @@ async function getSenderProfile(event) {
     // 如果 Line API 失敗，則回傳 '未知成員'，讓 Bot 程式繼續運行
     return { displayName: '未知成員' }; 
 }
+// 臨時測試函式：確認 MongoDB URI 是否被正確載入
+async function checkMongoURI() {
+    const uri = process.env.MONGODB_URI;
+    if (!uri || uri.includes('<db_password>')) {
+        console.error("MongoDB URI NOT LOADED OR NOT CONFIGURED!");
+        return "URI_ERROR";
+    }
+    return "URI_OK";
+}
 // 6. 核心事件處理函式 (MongoDB 邏輯)
 // 請用這段程式碼完整替換您檔案中的 async function handleEvent(event) 函式
 async function handleEvent(event) {
@@ -300,7 +309,18 @@ async function handleEvent(event) {
     }
     return null;
 }
+module.exports = async (req, res) => {
+    // ⚠️ 臨時測試程式碼：強制檢查 URI
+    const uriStatus = await checkMongoURI();
+    if (uriStatus === "URI_ERROR") {
+        return res.status(200).send("DB_URI_CHECK_FAILED"); // ⚠️ 應回傳 200，而不是 500
+    }
+    // ⚠️ 結束臨時測試程式碼
 
+    if (req.method !== 'POST') {
+        return res.status(405).send('Method Not Allowed');
+    }
+    // ... (後續程式碼不變)
 // 7. Vercel 輸出 Handler (使用單一導出函式，解決 Invalid export 錯誤)
 module.exports = async (req, res) => { // ⚠️ 這裡修改為 module.exports = async (req, res) =>
     if (req.method !== 'POST') {
