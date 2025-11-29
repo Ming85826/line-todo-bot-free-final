@@ -92,7 +92,7 @@ async function getSenderProfile(event) {
 }
 // 6. 核心事件處理函式 (MongoDB 邏輯)
 // 請用這段程式碼完整替換您檔案中的 async function handleEvent(event) 函式
-aasync function handleEvent(event) {
+async function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
         return null;
     }
