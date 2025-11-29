@@ -92,7 +92,7 @@ async function getSenderProfile(event) {
 }
 // 6. 核心事件處理函式 (MongoDB 邏輯)
 // 請用這段程式碼完整替換您檔案中的 async function handleEvent(event) 函式
-async function handleEvent(event) {
+aasync function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
         return null;
     }
@@ -102,8 +102,10 @@ async function handleEvent(event) {
     const lowerCaseText = messageText.toLowerCase();
     
     // 取得當前發送者的名稱
-    const senderProfile = await getSenderProfile(event);
-    const senderName = senderProfile.displayName;
+    // const senderProfile = await getSenderProfile(event); // 註解掉耗時的 Line API 呼叫
+    const senderName = "測試員"; // 使用固定的名稱代替
+    // const senderName = senderProfile.displayName; // 請移除或註解此行
+    // ... 確保這裡只有一行 const senderName = "測試員";
 
     try {
         const db = await getDB();
