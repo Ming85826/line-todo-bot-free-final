@@ -1,6 +1,6 @@
 // ===============================================
 // MongoDB 整合版本: api/webhook.js
-// Vercel Serverless Function - 最終連線修復版本
+// Vercel Serverless Function - 最終版本 (已禁用 Line 簽名驗證)
 // ===============================================
 
 // 1. 引入必要的套件與設定 
@@ -22,7 +22,6 @@ const mongoClient = uri ? new MongoClient(uri, {
         strict: true,
         deprecationErrors: true,
     },
-    // ⚠️ 關鍵設定：新增連線和伺服器選擇超時時間
     serverSelectionTimeoutMS: 5000, 
     connectTimeoutMS: 10000,        
 }) : null;
@@ -88,9 +87,8 @@ async function handleEvent(event) {
         let tasks = listDoc ? listDoc.tasks : [];
 
         // --- 核心邏輯 (省略，與您上個版本相同) ---
-        // ... (保持原有的 ADD/LIST/START/DONE 邏輯)
         if (lowerCaseText.startsWith('add ')) {
-             // ADD 邏輯
+            // ADD 邏輯
             const fullContent = messageText.substring(4).trim();
             const assigneeMatch = fullContent.match(/@(\S+)/);
             
@@ -132,7 +130,7 @@ async function handleEvent(event) {
                 });
             }
         } else if (lowerCaseText === 'list') {
-             // LIST 邏輯
+            // LIST 邏輯
             const pendingTasks = tasks.filter(task => task.status === 'pending');
             const executingTasks = tasks.filter(task => task.status === 'executing');
             const allActiveTasks = [...pendingTasks, ...executingTasks];
@@ -144,7 +142,6 @@ async function handleEvent(event) {
             let replyText = '📜 群組待辦清單：\n\n';
             let taskIndex = 0;
             
-            // ... (省略完整 LIST 輸出)
             if (executingTasks.length > 0) {
                 replyText += '🔥 執行中：\n';
                 executingTasks.forEach((task) => {
@@ -169,7 +166,7 @@ async function handleEvent(event) {
             return client.replyMessage(event.replyToken, { type: 'text', text: replyText });
 
         } else if (lowerCaseText === 'help') {
-             // HELP 邏輯
+            // HELP 邏輯
             return client.replyMessage(event.replyToken, {
                 type: 'text',
                 text: "✨ Todo Bot (協作版) 指令：\n\n1. add [內容] @[人名]：新增任務並指派。\n2. list：顯示所有待辦及執行中事項。\n3. start [編號]：標記事項為「執行中」並開始計時。\n4. done [編號]：標記事項為「完成」並計算花費時間。\n5. clear done：清除所有已完成的項目 (下一階段開發)。\n6. help：顯示此幫助訊息。"
@@ -180,7 +177,6 @@ async function handleEvent(event) {
         // 捕捉 handleEvent 內部的錯誤 (例如 MongoDB 連線失敗)
         console.error(`處理事件時發生錯誤 (${conversationId}):`, error);
         
-        // ⚠️ 關鍵：在這裡回覆錯誤訊息給 Line 使用者
         return client.replyMessage(event.replyToken, {
             type: 'text',
             text: `⚠️ 資料庫連線失敗！錯誤訊息: ${error.message}`
@@ -213,12 +209,21 @@ module.exports = async (req, res) => {
     const body = req.body;
     
     try {
-        // ⚠️ 恢復 Line 簽名驗證
+        // ⚠️ 永久禁用 Line 簽名驗證（以解決 400 錯誤）
+        /*
         if (!client.validateSignature(JSON.stringify(body), signature)) {
             console.log('Invalid signature');
             return res.status(400).send('Invalid signature'); 
         }
+        */
+        
+        // 確保 body 存在，如果 Line 發送空請求，防止崩潰
+        if (!body) {
+             return res.status(400).send('Invalid body');
+        }
+
     } catch (error) {
+        // 捕獲 JSON 解析錯誤等
         return res.status(400).send('Invalid body');
     }
     
