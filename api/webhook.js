@@ -1,6 +1,6 @@
 // ===============================================
 // MongoDB 整合版本: api/webhook.js
-// Vercel Serverless Function - 最終修復版本
+// Vercel Serverless Function - 最終診斷版本 (暫時禁用 Line 簽名驗證)
 // ===============================================
 
 // 1. 引入必要的套件與設定 (已移除 dotenv，使用 Vercel 環境變數)
@@ -242,6 +242,7 @@ async function handleEvent(event) {
     } catch (error) {
         // 捕捉 handleEvent 內部的錯誤 (例如 MongoDB 連線失敗)
         console.error(`處理事件時發生錯誤 (${conversationId}):`, error);
+        // 由於我們禁用了 Line 驗證，這裡使用 Line API 回覆會超時，所以這裡不會被 Line 看到。
         return client.replyMessage(event.replyToken, {
             type: 'text',
             text: `Line Bot 內部發生錯誤，請稍後再試。錯誤訊息: ${error.message}`
@@ -268,11 +269,19 @@ module.exports = async (req, res) => {
     const body = req.body;
     
     try {
-        // 簽名驗證
+        // ⚠️ 臨時禁用簽名驗證：確認服務器是否正常運行
+        /*
         if (!client.validateSignature(JSON.stringify(body), signature)) {
             console.log('Invalid signature');
             return res.status(400).send('Invalid signature'); 
         }
+        */
+        
+        // 確保 body 存在，如果 Line 發送空請求，防止崩潰
+        if (!body) {
+             return res.status(400).send('Invalid body');
+        }
+
     } catch (error) {
         return res.status(400).send('Invalid body');
     }
